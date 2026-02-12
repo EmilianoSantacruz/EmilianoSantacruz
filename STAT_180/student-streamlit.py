@@ -5,22 +5,58 @@ import seaborn as sns
 
 # ===== PAGE CONFIG =====
 st.set_page_config(
-    page_title="Tips Dashboard",
+    page_title="Restaurant Tips Dashboard",
     page_icon="🍽️",
     layout="wide"
 )
 
+# ===== GREEN THEME (CSS) =====
+GREEN = "#22c55e"  # nice green
+st.markdown(
+    f"""
+    <style>
+    /* Tabs underline and selected tab */
+    div[data-baseweb="tab-list"] button[aria-selected="true"] {{
+        border-bottom: 3px solid {GREEN} !important;
+    }}
+    div[data-baseweb="tab-list"] button:hover {{
+        color: {GREEN} !important;
+    }}
+
+    /* Slider color */
+    div[data-baseweb="slider"] div[role="slider"] {{
+        border-color: {GREEN} !important;
+    }}
+    div[data-baseweb="slider"] div[data-testid="stSliderTickBar"] > div {{
+        background: {GREEN} !important;
+    }}
+
+    /* Checkbox / Radio / Select focus outline */
+    .stRadio div[role="radiogroup"] label:focus-within,
+    .stCheckbox label:focus-within,
+    .stSelectbox div:focus-within {{
+        outline: 2px solid {GREEN} !important;
+        border-radius: 8px;
+    }}
+
+    /* Metric label emphasis */
+    [data-testid="stMetricLabel"] {{
+        color: #cbd5e1;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# ===== TITLE =====
 st.title("🍽️ Restaurant Tips Dashboard")
-st.markdown("Explore restaurant bills and tips. Use filters to see patterns.")
+st.caption("Explore restaurant bills and tips. Use the sidebar filters to narrow results.")
 
 # ===== LOAD DATA =====
-df = sns.load_dataset("tips")
-
-# Create useful columns
-df = df.copy()
+df = sns.load_dataset("tips").copy()
 df["tip_pct"] = (df["tip"] / df["total_bill"]) * 100
 
-# ===== SIDEBAR FILTERS =====
+# ===== SIDEBAR FILTERS (NO SEARCH) =====
 with st.sidebar:
     st.header("Filters")
 
@@ -71,56 +107,50 @@ if selected_time != "All":
 if smoker_option != "All":
     filtered_df = filtered_df[filtered_df["smoker"] == smoker_option]
 
-# Avoid divide by zero issues if user filters everything out
 if len(filtered_df) == 0:
     st.warning("No rows match your filters. Try widening the filters.")
     st.stop()
 
-# ===== KEY METRICS =====
-st.subheader("Key Metrics")
-c1, c2, c3, c4 = st.columns(4)
+# ===== MAIN NAV (DIFFERENT ORGANIZATION) =====
+tab_overview, tab_explore, tab_insights = st.tabs(["✅ Overview", "📊 Explore Data", "📈 Insights"])
 
-with c1:
-    st.metric("Total Bills", len(filtered_df))
+# ===== OVERVIEW TAB =====
+with tab_overview:
+    st.subheader("Key Metrics")
 
-with c2:
-    avg_tip_pct = filtered_df["tip_pct"].mean()
-    st.metric("Average Tip %", f"{avg_tip_pct:.1f}%")
+    c1, c2, c3, c4, c5 = st.columns(5)
 
-with c3:
-    avg_bill = filtered_df["total_bill"].mean()
-    st.metric("Average Bill", f"${avg_bill:.2f}")
+    with c1:
+        st.metric("Rows", len(filtered_df))
 
-with c4:
-    max_bill = filtered_df["total_bill"].max()
-    st.metric("Largest Bill", f"${max_bill:.2f}")
+    with c2:
+        st.metric("Avg Tip %", f"{filtered_df['tip_pct'].mean():.1f}%")
 
-# ===== COLUMS =====
-col1, col2, col3 = st.columns(["📊 Data", "📈 Visualizations", "ℹ️ Details"])
+    with c3:
+        st.metric("Avg Bill", f"${filtered_df['total_bill'].mean():.2f}")
 
-# col 1: DATA TABLE
-with col1:
-    st.subheader("Dataset")
-    st.write(f"Showing {len(filtered_df)} of {len(df)} rows")
-    st.dataframe(filtered_df, use_container_width=True)
+    with c4:
+        st.metric("Avg Tip", f"${filtered_df['tip'].mean():.2f}")
 
-# col 2: VISUALIZATIONS
-with col2:
-    st.subheader("Visualizations")
+    with c5:
+        st.metric("Largest Bill", f"${filtered_df['total_bill'].max():.2f}")
 
-    col1, col2 = st.columns(2)
+    st.markdown("---")
 
-    with col1:
+    left, right = st.columns(2)
+
+    with left:
         st.write("**Average Tip % by Day**")
         fig, ax = plt.subplots(figsize=(6, 4))
-        tip_by_day = filtered_df.groupby("day")["tip_pct"].mean().reindex(sorted(df["day"].unique()))
+        order_days = sorted(df["day"].unique())
+        tip_by_day = filtered_df.groupby("day")["tip_pct"].mean().reindex(order_days)
         tip_by_day.plot(kind="bar", ax=ax)
         ax.set_xlabel("Day")
         ax.set_ylabel("Average Tip %")
         plt.xticks(rotation=0)
         st.pyplot(fig)
 
-    with col2:
+    with right:
         st.write("**Total Bill Distribution**")
         fig, ax = plt.subplots(figsize=(6, 4))
         filtered_df["total_bill"].hist(bins=20, ax=ax, edgecolor="black")
@@ -128,43 +158,60 @@ with col2:
         ax.set_ylabel("Count")
         st.pyplot(fig)
 
-    st.write("**Total Bill vs Tip (colored by meal time)**")
-    fig, ax = plt.subplots(figsize=(8, 4))
-    sns.scatterplot(data=filtered_df, x="total_bill", y="tip", hue="time", ax=ax)
-    ax.set_xlabel("Total bill ($)")
-    ax.set_ylabel("Tip ($)")
-    st.pyplot(fig)
+# ===== EXPLORE DATA TAB =====
+with tab_explore:
+    st.subheader("Filtered Dataset")
+    st.write(f"Showing **{len(filtered_df)}** of **{len(df)}** rows")
+    st.dataframe(filtered_df, use_container_width=True)
 
-    st.write("**Tip % by Smoker**")
-    fig, ax = plt.subplots(figsize=(7, 4))
-    sns.boxplot(data=filtered_df, x="smoker", y="tip_pct", ax=ax)
-    ax.set_xlabel("Smoker")
-    ax.set_ylabel("Tip %")
-    st.pyplot(fig)
+    st.download_button(
+        label="Download filtered data as CSV",
+        data=filtered_df.to_csv(index=False).encode("utf-8"),
+        file_name="tips_filtered.csv",
+        mime="text/csv"
+    )
 
-# col 3: DETAILS
-with col3:
-    st.subheader("Additional Information")
+# ===== INSIGHTS TAB =====
+with tab_insights:
+    st.subheader("Visual Insights")
 
-    with st.expander("📊 View Data Statistics"):
-        st.write("**Descriptive statistics (numeric columns):**")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.write("**Total Bill vs Tip (by meal time)**")
+        fig, ax = plt.subplots(figsize=(6, 4))
+        sns.scatterplot(data=filtered_df, x="total_bill", y="tip", hue="time", ax=ax)
+        ax.set_xlabel("Total bill ($)")
+        ax.set_ylabel("Tip ($)")
+        st.pyplot(fig)
+
+    with col2:
+        st.write("**Tip % by Smoker**")
+        fig, ax = plt.subplots(figsize=(6, 4))
+        sns.boxplot(data=filtered_df, x="smoker", y="tip_pct", ax=ax)
+        ax.set_xlabel("Smoker")
+        ax.set_ylabel("Tip %")
+        st.pyplot(fig)
+
+    st.markdown("---")
+
+    with st.expander("📊 Statistics"):
         st.dataframe(filtered_df[["total_bill", "tip", "size", "tip_pct"]].describe())
 
-    with st.expander("🔗 View Correlation Matrix"):
+    with st.expander("🔗 Correlation Matrix"):
         numeric_cols = ["total_bill", "tip", "size", "tip_pct"]
         corr = filtered_df[numeric_cols].corr()
-
         fig, ax = plt.subplots(figsize=(6, 5))
         sns.heatmap(corr, annot=True, cmap="coolwarm", ax=ax)
         st.pyplot(fig)
 
-    with st.expander("📖 About This Dataset"):
+    with st.expander("📖 About this dataset"):
         st.write("""
         **Tips Dataset (Seaborn)**
-        
+
         This dataset includes restaurant bills and tips.
-        
-        **Main columns:**
+
+        **Columns:**
         - **total_bill**: total bill in dollars
         - **tip**: tip in dollars
         - **sex**: sex of the person paying
