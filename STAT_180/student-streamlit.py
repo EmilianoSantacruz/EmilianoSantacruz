@@ -3,22 +3,18 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# ===== PAGE CONFIG =====
 st.set_page_config(
     page_title="Restaurant Tips Dashboard",
     page_icon="🍽️",
     layout="wide"
 )
 
-# ===== TITLE =====
 st.title("🍽️ Restaurant Tips Dashboard")
 st.caption("Explore restaurant bills and tips. Use the sidebar filters to narrow results.")
 
-# ===== LOAD DATA =====
 df = sns.load_dataset("tips").copy()
 df["tip_pct"] = (df["tip"] / df["total_bill"]) * 100
 
-# ===== SIDEBAR FILTERS (NO SEARCH) =====
 with st.sidebar:
     st.header("Filters")
 
@@ -55,7 +51,6 @@ with st.sidebar:
         step=1.0
     )
 
-# ===== APPLY FILTERS =====
 filtered_df = df[
     (df["day"].isin(selected_days)) &
     (df["size"] >= size_min) &
@@ -73,10 +68,8 @@ if len(filtered_df) == 0:
     st.warning("No rows match your filters. Try widening the filters.")
     st.stop()
 
-# ===== MAIN NAV (DIFFERENT ORGANIZATION) =====
 tab_overview, tab_explore, tab_insights = st.tabs(["✅ Overview", "📊 Explore Data", "📈 Insights"])
 
-# ===== OVERVIEW TAB =====
 with tab_overview:
     st.subheader("Key Metrics")
 
@@ -120,7 +113,6 @@ with tab_overview:
         ax.set_ylabel("Count")
         st.pyplot(fig)
 
-# ===== EXPLORE DATA TAB =====
 with tab_explore:
     st.subheader("Filtered Dataset")
     st.write(f"Showing **{len(filtered_df)}** of **{len(df)}** rows")
@@ -133,7 +125,6 @@ with tab_explore:
         mime="text/csv"
     )
 
-# ===== INSIGHTS TAB =====
 with tab_insights:
     st.subheader("Visual Insights")
 
