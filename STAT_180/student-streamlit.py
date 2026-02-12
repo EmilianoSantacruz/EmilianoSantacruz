@@ -95,17 +95,17 @@ with c4:
     max_bill = filtered_df["total_bill"].max()
     st.metric("Largest Bill", f"${max_bill:.2f}")
 
-# ===== TABS =====
-tab1, tab2, tab3 = st.tabs(["📊 Data", "📈 Visualizations", "ℹ️ Details"])
+# ===== COLUMS =====
+col1, col2, col3 = st.cols(["📊 Data", "📈 Visualizations", "ℹ️ Details"])
 
-# TAB 1: DATA TABLE
-with tab1:
+# col 1: DATA TABLE
+with col1:
     st.subheader("Dataset")
     st.write(f"Showing {len(filtered_df)} of {len(df)} rows")
     st.dataframe(filtered_df, use_container_width=True)
 
-# TAB 2: VISUALIZATIONS
-with tab2:
+# col 2: VISUALIZATIONS
+with col2:
     st.subheader("Visualizations")
 
     col1, col2 = st.columns(2)
@@ -142,8 +142,8 @@ with tab2:
     ax.set_ylabel("Tip %")
     st.pyplot(fig)
 
-# TAB 3: DETAILS
-with tab3:
+# col 3: DETAILS
+with col3:
     st.subheader("Additional Information")
 
     with st.expander("📊 View Data Statistics"):
