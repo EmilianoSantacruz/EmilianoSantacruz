@@ -57,12 +57,6 @@ with st.sidebar:
         step=1.0
     )
 
-    text_search = st.text_input(
-        "Search text:",
-        value="",
-        placeholder="Search day, time, sex..."
-    )
-
 # ===== APPLY FILTERS =====
 filtered_df = df[
     (df["day"].isin(selected_days)) &
