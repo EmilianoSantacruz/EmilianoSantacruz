@@ -96,7 +96,7 @@ with c4:
     st.metric("Largest Bill", f"${max_bill:.2f}")
 
 # ===== COLUMS =====
-col1, col2, col3 = st.cols(["📊 Data", "📈 Visualizations", "ℹ️ Details"])
+col1, col2, col3 = st.columns(["📊 Data", "📈 Visualizations", "ℹ️ Details"])
 
 # col 1: DATA TABLE
 with col1:
