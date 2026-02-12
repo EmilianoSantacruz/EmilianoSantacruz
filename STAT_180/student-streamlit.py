@@ -10,44 +10,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# ===== GREEN THEME (CSS) =====
-GREEN = "#22c55e"  # nice green
-st.markdown(
-    f"""
-    <style>
-    /* Tabs underline and selected tab */
-    div[data-baseweb="tab-list"] button[aria-selected="true"] {{
-        border-bottom: 3px solid {GREEN} !important;
-    }}
-    div[data-baseweb="tab-list"] button:hover {{
-        color: {GREEN} !important;
-    }}
-
-    /* Slider color */
-    div[data-baseweb="slider"] div[role="slider"] {{
-        border-color: {GREEN} !important;
-    }}
-    div[data-baseweb="slider"] div[data-testid="stSliderTickBar"] > div {{
-        background: {GREEN} !important;
-    }}
-
-    /* Checkbox / Radio / Select focus outline */
-    .stRadio div[role="radiogroup"] label:focus-within,
-    .stCheckbox label:focus-within,
-    .stSelectbox div:focus-within {{
-        outline: 2px solid {GREEN} !important;
-        border-radius: 8px;
-    }}
-
-    /* Metric label emphasis */
-    [data-testid="stMetricLabel"] {{
-        color: #cbd5e1;
-    }}
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 # ===== TITLE =====
 st.title("🍽️ Restaurant Tips Dashboard")
 st.caption("Explore restaurant bills and tips. Use the sidebar filters to narrow results.")
