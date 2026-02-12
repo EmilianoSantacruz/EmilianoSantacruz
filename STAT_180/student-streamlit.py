@@ -71,15 +71,6 @@ if selected_time != "All":
 if smoker_option != "All":
     filtered_df = filtered_df[filtered_df["smoker"] == smoker_option]
 
-if text_search:
-    mask = (
-        filtered_df["day"].astype(str).str.contains(text_search, case=False, na=False) |
-        filtered_df["time"].astype(str).str.contains(text_search, case=False, na=False) |
-        filtered_df["sex"].astype(str).str.contains(text_search, case=False, na=False) |
-        filtered_df["smoker"].astype(str).str.contains(text_search, case=False, na=False)
-    )
-    filtered_df = filtered_df[mask]
-
 # Avoid divide by zero issues if user filters everything out
 if len(filtered_df) == 0:
     st.warning("No rows match your filters. Try widening the filters.")
